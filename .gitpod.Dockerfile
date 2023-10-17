@@ -12,19 +12,24 @@ RUN sudo install-packages \
 
 # Apply user-specific settings
 
-# Install Singularity
-RUN sudo apt-get update && \
-    sudo apt-get install -y build-essential libssl-dev uuid-dev libgpgme11-dev squashfs-tools libseccomp-dev wget pkg-config git cryptsetup && \
-    wget https://golang.org/dl/go1.17.2.linux-amd64.tar.gz && \
-    sudo tar -C /usr/local -xzvf go1.17.2.linux-amd64.tar.gz && \
-    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc && \
-    source ~/.bashrc && \
-    export VERSION=3.9.1 && \
-    wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz && \
-    tar -xzf singularity-${VERSION}.tar.gz && \
-    cd singularity && \
-    ./mconfig && \
+# Update system and install singularity
+RUN sudo apt-get update && sudo apt-get install -y build-essential \
+    libssl-dev uuid-dev libgpgme11-dev squashfs-tools libseccomp-dev wget pkg-config git cryptsetup-bin && \
+    GO_VERSION=$(go version | awk '{print $3}' | tr -d 'go') && \
+    if [ "$(printf '%s\n' "1.16" "$GO_VERSION" | sort -V | head -n1)" != "1.16" ]; then \
+        VERSION=$(curl -s https://go.dev/VERSION?m=text | tr -d '\n') && \
+        wget https://dl.google.com/go/$VERSION.linux-amd64.tar.gz && \
+        sudo tar -C /usr/local -xzf $VERSION.linux-amd64.tar.gz && \
+        rm $VERSION.linux-amd64.tar.gz; \
+    fi && \
+    VERSION=3.9.0 && \
+    wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-ce-${VERSION}.tar.gz && \
+    tar -xzf singularity-ce-${VERSION}.tar.gz && rm singularity-ce-${VERSION}.tar.gz && \
+    cd singularity-ce-${VERSION} && \
+    ./mconfig --without-suid && \
     make -C builddir && \
+    sed -i 's;mount proc = yes;mount proc = no;g' builddir/singularity.conf && \
+    sed -i '/bind path = \/etc\/hosts/a bind path = \/proc' builddir/singularity.conf && \
     sudo make -C builddir install
 
 # Install and setup micromamba
