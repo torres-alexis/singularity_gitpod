@@ -32,11 +32,9 @@ RUN sudo apt-get update && sudo apt-get install -y build-essential \
     sed -i '/bind path = \/etc\/hosts/a bind path = \/proc' builddir/singularity.conf && \
     sudo make -C builddir install
 
-# Install and setup micromamba
-RUN wget https://micro.mamba.pm/api/micromamba/linux-64/latest -O micromamba.tar.bz2 && \
+# Install micromamba
+RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba && \
     mkdir -p ~/micromamba && \
-    tar -xvjf micromamba.tar.bz2 -C ~/micromamba --strip-components 1 && \
-    rm micromamba.tar.bz2 && \
-    echo 'export MAMBA_ROOT_PREFIX=~/micromamba' >> ~/.bashrc && \
-    echo 'export MAMBA_EXE=~/micromamba/bin/micromamba' >> ~/.bashrc && \
-    echo 'source ~/micromamba/etc/profile.d/mamba.sh' >> ~/.bashrc
+    ./bin/micromamba shell init -s bash -p ~/micromamba && \
+    echo "source ~/micromamba/etc/profile.d/mamba.sh" >> ~/.bashrc && \
+    rm -rf ./bin/micromamba
