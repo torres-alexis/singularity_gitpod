@@ -1,0 +1,12 @@
+micromamba env create -f RNAseq_fq_to_counts_tools.yml
+
+micromamba env create -f RNAseq_R_tools.yml
+This was broken with more libgfortran-ng version incompatibilities
+
+micromamba create -n genelab-utils -c conda-forge -c bioconda -c defaults -c astrobiomike genelab-utils
+micromamba activate genelab-utils
+
+git clone https://github.com/AstrobioMike/genelab-utils.git
+
+
+pip install gdown

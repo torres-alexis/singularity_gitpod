@@ -1,2 +1,20 @@
 image:
   file: .gitpod.Dockerfile
+
+tasks:
+  - init: |
+      # Download and extract micromamba
+      curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+
+      # Move micromamba to a directory (optional step to organize your environment)
+      mkdir -p ~/micromamba
+      mv bin/micromamba ~/micromamba/
+
+      # Initialize micromamba for the bash shell. This modifies the .bashrc file.
+      ~/micromamba/micromamba shell init -s bash -p ~/micromamba
+
+      # Source the .bashrc file to apply the changes to the current shell session
+      source ~/.bashrc
+
+      # Activate the micromamba base environment
+      micromamba activate
